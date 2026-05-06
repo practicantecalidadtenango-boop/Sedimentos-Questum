@@ -10,7 +10,7 @@ from datetime import datetime
 st.set_page_config(page_title="Dashboard SPC Live - Questum", layout="wide")
 
 # RUTA DE LA BASE DE DATOS LOCAL
-RUTA_BD = r"C:\Users\mcxgtovar\Documents\Sedimentos\BD_LECTURAS_LIVE.xlsx"
+RUTA_BD = "https://raw.githubusercontent.com/MaxGtov/bot-sedimento-gm/main/BD_LECTURAS_LIVE.xlsx"
 
 # COLUMNAS QUE NO SON VARIABLES
 COLUMNAS_METADATA = [
