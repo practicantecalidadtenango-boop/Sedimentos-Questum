@@ -8,7 +8,7 @@ from datetime import datetime
 # ==========================================
 st.set_page_config(page_title="Dashboard SPC Live - Questum", layout="wide")
 
-# Lectura directa desde el repositorio
+# Lectura directa desde el repositorio (misma carpeta)
 RUTA_BD = "BD_LECTURAS_LIVE.xlsx"
 
 COLUMNAS_METADATA = [
@@ -54,22 +54,18 @@ if df is not None:
 
     df_final = df_linea[df_linea['Bot_Hoja'] == hoja_sel].copy()
     
-    # --- OBTENER ÚLTIMA ACTUALIZACIÓN ---
-    # Usamos la fecha que el bot grabó al momento de subir los datos
+    # Obtener última actualización del Bot
     ultima_act = df_final['Bot_Fecha'].max()
-    formato_fecha = ultima_act.strftime("%d/%m/%Y %H:%M:%S") if not pd.isna(ultima_act) else "Sin datos"
+    formato_fecha_bot = ultima_act.strftime("%d/%m/%Y %H:%M:%S") if not pd.isna(ultima_act) else "Sin datos"
 
     # ==========================================
-    # 3. LETREROS DE ENCABEZADO (NUEVO)
+    # 3. LETREROS DE ENCABEZADO
     # ==========================================
-    # Creamos dos columnas para los letreros superiores
     c1, c2 = st.columns(2)
-    
     with c1:
         st.info(f"🏗️ **LÍNEA ACTUAL:** {linea_sel}  \n🎯 **OPERACIÓN:** {hoja_sel}")
-        
     with c2:
-        st.success(f"📅 **ÚLTIMA ACTUALIZACIÓN DEL BOT:** \n⏰ {formato_fecha}")
+        st.success(f"📅 **ÚLTIMA ACTUALIZACIÓN DEL BOT:** \n⏰ {formato_fecha_bot}")
 
     st.markdown("---")
 
@@ -122,11 +118,23 @@ if df is not None:
             else:
                 fig.add_hrect(y0=0, y1=tope, fillcolor="red", opacity=0.2, line_width=0, layer="below")
 
-            # Anotación último dato
+            # --- ETIQUETA DINÁMICA CON VALOR Y HORA ---
             ultimo = df_grafica.iloc[-1]
-            fig.add_annotation(x=ultimo['Fecha y hora'], y=ultimo[variable_sel], 
-                               text=f"<b>ACTUAL: {ultimo[variable_sel]:.1f}</b>",
-                               showarrow=True, arrowhead=2, ay=-40, bgcolor="white", font=dict(color="black"))
+            # Formateamos la hora del registro (ej: 14:30)
+            hora_registro = ultimo['Fecha y hora'].strftime("%H:%M")
+            
+            fig.add_annotation(
+                x=ultimo['Fecha y hora'], 
+                y=ultimo[variable_sel], 
+                text=f"<b>ACTUAL: {ultimo[variable_sel]:.1f}</b><br>🕒 {hora_registro}",
+                showarrow=True, 
+                arrowhead=2, 
+                ay=-50, # Subimos un poco más la etiqueta para que quepa la hora
+                bgcolor="white", 
+                font=dict(color="black", size=11),
+                bordercolor="black",
+                borderwidth=1
+            )
 
             fig.update_xaxes(type='date', tickformat="%d-%b %H:%M", tickangle=-45)
             fig.add_hline(y=usl, line_dash="dash", line_color="red", annotation_text=f"Límite Máx ({usl})")
@@ -140,7 +148,7 @@ if df is not None:
     st.subheader("📋 Registro de Mediciones")
     st.dataframe(df_final.sort_values('Fecha y hora', ascending=False), use_container_width=True)
 
-    if st.button("🔄 Refrescar"):
+    if st.button("🔄 Refrescar Datos"):
         st.cache_data.clear()
         st.rerun()
 else:
