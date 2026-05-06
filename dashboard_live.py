@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import os
 from datetime import datetime
 
 # ==========================================
@@ -9,7 +8,7 @@ from datetime import datetime
 # ==========================================
 st.set_page_config(page_title="Dashboard SPC Live - Questum", layout="wide")
 
-# RUTA DE LA BASE DE DATOS LOCAL
+# ENLACE RAW DE TU GITHUB
 RUTA_BD = "https://raw.githubusercontent.com/MaxGtov/bot-sedimento-gm/main/BD_LECTURAS_LIVE.xlsx"
 
 # COLUMNAS QUE NO SON VARIABLES
@@ -22,12 +21,15 @@ COLUMNAS_METADATA = [
 
 @st.cache_data(ttl=60)
 def cargar_datos():
-    if os.path.exists(RUTA_BD):
+    try:
+        # Pandas descargará el Excel directo desde el enlace Web de GitHub
         df = pd.read_excel(RUTA_BD)
         df['Fecha y hora'] = pd.to_datetime(df['Fecha y hora'], errors='coerce')
         df['Bot_Fecha'] = pd.to_datetime(df['Bot_Fecha'], errors='coerce')
         return df
-    return None
+    except Exception as e:
+        print(f"Error al cargar datos web: {e}")
+        return None
 
 # ==========================================
 # 2. ENCABEZADO
@@ -69,7 +71,7 @@ if df is not None:
             with col4: st.metric("Mínimo", f"{df_grafica[variable_sel].min():.3f}")
 
             # ==========================================
-            # 5. GRÁFICA CON EJE X Y ETIQUETA DE ÚLTIMO DATO
+            # 5. GRÁFICA CON ETIQUETA DE ÚLTIMO DATO
             # ==========================================
             st.subheader(f"📊 Gráfico de Control: {variable_sel}")
             
@@ -80,9 +82,8 @@ if df is not None:
                          hover_data=['N° Medición', 'Capturador'],
                          template="plotly_dark")
 
-            # --- ETIQUETA DINÁMICA PARA EL ÚLTIMO DATO ---
-            ultimo_punto = df_grafica.iloc[-1] # Obtenemos la última fila
-            
+            # Etiqueta dinámica para el último dato
+            ultimo_punto = df_grafica.iloc[-1]
             fig.add_annotation(
                 x=ultimo_punto['Fecha y hora'],
                 y=ultimo_punto[variable_sel],
@@ -90,14 +91,14 @@ if df is not None:
                 showarrow=True,
                 arrowhead=2,
                 ax=0,
-                ay=-40, # Distancia hacia arriba del punto
-                bgcolor="rgba(0, 255, 255, 0.9)", # Color Cian con opacidad
+                ay=-40,
+                bgcolor="rgba(0, 255, 255, 0.9)",
                 font=dict(color="black", size=12),
                 bordercolor="white",
                 borderwidth=1
             )
 
-            # MEJORAS DEL EJE X
+            # Eje X y Y
             fig.update_xaxes(
                 title_text='Fecha y Hora de Medición',
                 type='date',
@@ -119,8 +120,8 @@ if df is not None:
     st.subheader("📋 Datos en Bruto")
     st.dataframe(df_final.sort_values('Fecha y hora', ascending=False), use_container_width=True)
 
-    if st.button("🔄 Actualizar"):
+    if st.button("🔄 Actualizar Datos"):
         st.cache_data.clear()
         st.rerun()
 else:
-    st.error("Esperando datos del Bot...")
+    st.error("No se encontraron datos. Asegúrate de que el Bot haya subido el Excel a GitHub.")
