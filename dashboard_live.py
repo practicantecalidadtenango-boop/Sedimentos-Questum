@@ -43,7 +43,7 @@ def cargar_datos():
 # ==========================================
 # 3. ENCABEZADO
 # ==========================================
-st.title("🚀 Monitoreo SPC Multilínea con Zonas Automáticas")
+st.title("🚀 Monitoreo Sedimentos-Automático")
 st.markdown("---")
 
 df = cargar_datos()
