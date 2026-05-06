@@ -9,7 +9,8 @@ from datetime import datetime
 st.set_page_config(page_title="Dashboard SPC Live - Questum", layout="wide")
 
 # ENLACE RAW DE TU GITHUB
-RUTA_BD = "https://raw.githubusercontent.com/MaxGtov/bot-sedimento-gm/main/BD_LECTURAS_LIVE.xlsx"
+# REEMPLAZA LA RUTA LARGA POR ESTA LÍNEA CORTA:
+RUTA_BD = "BD_LECTURAS_LIVE.xlsx"
 
 # COLUMNAS QUE NO SON VARIABLES
 COLUMNAS_METADATA = [
